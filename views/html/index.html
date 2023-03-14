@@ -57,9 +57,9 @@
         event.preventDefault();
 				callEntityAPI();
 				$('#form').toggleClass('hidden');
-				$('html, body').animate({
-					scrollTop: $("#form").offset().top
-				}, 500);
+				// $('html, body').animate({
+				// 	scrollTop: $("#form").offset().top
+				// }, 500);
       });
       $("#formApplication").submit(function(event) {
         event.preventDefault();
@@ -71,7 +71,7 @@
 
 		function callEntityAPI() {
 			var uen = document.getElementById("input_uen").value;
-
+			let attribute = document.getElementById("input_attribute").value
 			$.ajax({
 				url: "/getEntityData",
 				data: {
@@ -80,15 +80,26 @@
 				type: "POST",
 				success: function (formdata) {
 					if (formdata.status == "OK") {
-						prefillForm(formdata.text);
+						const form_filler_store = {
+							"BP": prefillFormBP,
+							"ADD": prefillFormADD,
+							"APP": prefillFormAPP,
+							"CAP": prefillFormCAP,
+							"FIN": prefillFormFIN,
+							"GRA": prefillFormGRA,
+							"HIS": prefillFormHIS,
+							"LIC": prefillFormLIC,
+							"SHA": prefillFormSHA
+						}
+						form_filler_store[attribute](formdata.text)
 					} else {
 						alert("ERROR:"+JSON.stringify(formdata.msg));
 					}
 				}
 			})
 		}
-    // Prefill Online Form with EDH data
-    function prefillForm(data) {
+    // Prefill Online Form with EDH basic Profile data
+    function prefillFormBP(data) {
       // prefill form data
       var formValues = null;
 
@@ -132,9 +143,171 @@
 			}
 
       // Populate values
-      populate('#formApplication', formValues);
+      populate('#formApplicationBP', formValues);
 
     }
+
+	function prefillFormADD(data) {
+
+	  let address = data['addresses'][0]
+	  document.getElementById("num-records-ADD").innerHTML = `${data["addresses"].length} addresses found. Only displaying the first address`
+      // prefill form data
+      let formValues = {
+        // entity details
+        "uen": data['basic-profile']['uen']['value'],
+        "address-type": address['addresstype'],
+        "block": address['block']['value'],
+        "building": address['building']['value'],
+        "floor": address['floor']['value'],
+        "unit": address['unit']['value'],
+		"street": address['street']['value'],
+		"postal-code": address['postal']['value'],
+		"purpose": address['purpose']['value']
+      };
+
+      // Populate values
+      populate('#formApplicationADD', formValues);
+    }
+
+	function prefillFormAPP(data) {
+
+		let appointment = data['appointments'][0]
+		document.getElementById("num-records-APP").innerHTML = `${data["appointments"].length} appointments found. Only displaying the first appointment`
+		// prefill form data
+		let formValues = {
+			// entity details
+			"uen": data['basic-profile']['uen']['value'],
+			"appointed-date": appointment['appointed-date']['value'],
+			"appointed-person-name": appointment['appointed-person']['name']['value'],
+			"nationality": appointment['appointed-person']['nationality']['desc'],
+			"id-number": appointment['appointed-person']['id-no']['value'],
+			"id-type": appointment['appointed-person']['id-type']['desc'],
+			"category": appointment['category']['desc'],
+			"position": appointment['position']['desc'],
+		};
+
+		// Populate values
+		populate('#formApplicationAPP', formValues);
+	}
+
+	function prefillFormCAP(data) {
+
+		let capital = data['capitals'][0]
+		document.getElementById("num-records-CAP").innerHTML = `${data["capitals"].length} capitals found. Only displaying the first capital`
+		// prefill form data
+		let formValues = {
+			// entity details
+			"uen": data['basic-profile']['uen']['value'],
+			"capital-conversion": capital['capital-conversion']['value'],
+			"capital-currency": capital['capital-currency']['desc'],
+			"capital-issued-amount": capital['capital-issued-amount']['value'],
+			"capital-paidup-amount": capital['capital-paidup-amount']['value'],
+			"capital-share-allotted-number": capital['capital-share-allotted-number']['value'],
+			"capital-share-type": capital['capital-share-type']['desc'],
+		};
+
+		// Populate values
+		populate('#formApplicationCAP', formValues);
+	}
+
+	function prefillFormFIN(data) {
+
+		let financials = data['financials'][0]
+		document.getElementById("num-records-FIN").innerHTML = `${data["financials"].length} financials found. Only displaying the first financial record`
+		// prefill form data
+		let formValues = {
+			// entity details
+			"uen": data['basic-profile']['uen']['value'],
+			"audited": financials['audited']['value'],
+			"currency": financials['currency']['desc'],
+			"current-period-start-date": financials['current-period-start-date']['value'],
+			"period-end-date": financials['period-end-date']['value'],
+			"profit-loss-after-tax": financials['profit-loss-after-tax']['value'],
+			"profit-loss-before-tax": financials['profit-loss-before-tax']['value'],
+			"revenue": financials['revenue']['value'],
+		};
+
+		// Populate values
+		populate('#formApplicationFIN', formValues);
+	}
+
+	function prefillFormGRA(data) {
+
+		let grants = data['grants'][0]
+		document.getElementById("num-records-GRA").innerHTML = `${data["grants"].length} grants found. Only displaying the first grant record`
+		// prefill form data
+		let formValues = {
+			// entity details
+			"uen": data['basic-profile']['uen']['value'],
+			"approved-amount": grants['approved-amount']['value'],
+			"development-category": grants['development-category']['desc'],
+			"functional-area": grants['functional-area']['desc'],
+			"last-updated-date": grants['last-updated-date']['value']
+		};
+
+		// Populate values
+		populate('#formApplicationGRA', formValues);
+	}
+
+	function prefillFormHIS(data) {
+
+		let history = data['history']
+		// prefill form data
+		let formValues = {
+			// entity details
+			"uen": data['basic-profile']['uen']['value'],
+			"previous-names": history['previous-names'].map(record => "(" + record['history-name']['value'] + "," + record['history-name-effective-date']['value'] + ")").join(", "),
+			"previous-uen": history['previous-uen'].map(record => record['history-uen']['value']).join(", "),
+		};
+		// Populate values
+		populate('#formApplicationHIS', formValues);
+	}
+
+	function prefillFormLIC(data) {
+
+		let licenses = data['licences'][0]
+		document.getElementById("num-records-LIC").innerHTML = `${data["licences"].length} licenses found. Only displaying the first license`
+		// prefill form data
+		let formValues = {
+			// entity details
+			"uen": data['basic-profile']['uen']['value'],
+			"expiry-date": licenses['expiry-date']['value'],
+			"id": licenses['id']['value'],
+			"issuance-agency": licenses['issuance-agency']['desc'],
+			"issue-date": licenses['issue-date']['value'],
+			"name": licenses['name']['value'],
+			"number": licenses['number']['value'],
+			"renewal-indicator": licenses['renewal-indicator']['value'],
+			"status": licenses['status']['desc']
+		};
+
+		// Populate values
+		populate('#formApplicationLIC', formValues);
+	}
+
+	function prefillFormSHA(data) {
+
+		let licenses = data['shareholders'][0]
+		document.getElementById("num-records-SHA").innerHTML = `${data["shareholders"].length} shareholders found. Only displaying the first shareholder record`
+		// prefill form data
+		let formValues = {
+			// entity details
+			"uen": data['basic-profile']['uen']['value'],
+			"active": licenses['active']['value'],
+			"allocation": licenses['allocation']['value'],
+			"category": licenses['category']['desc'],
+			"currency": licenses['currency']['desc'],
+			"share-group": licenses['share-group']['value'],
+			"share-type": licenses['share-type']['desc'],
+			"id-no": licenses['shareholder']['id-no']['value'],
+			"id-type": licenses['shareholder']['id-type']['desc'],
+			"name": licenses['shareholder']['name']['value'],
+			"nationality": licenses['shareholder']['nationality']['desc'],
+		};
+
+		// Populate values
+		populate('#formApplicationSHA', formValues);
+	}
 
     // CALLBACK HANDLER
     if (this.location.href.indexOf("callback?") > -1) {
@@ -148,6 +321,11 @@
         $('[name=' + key + ']', frm).val(value);
         $('[name=' + key + ']', frm).prop('disabled', true);
       });
+	  console.log(frm.substring(1))
+	  		document.getElementById(frm.substring(1)).style.display = "block"
+			$('html, body').animate({
+					scrollTop: $("#form").offset().top
+				}, 500);
 			scrollToAppForm = true;
     }
 
@@ -204,6 +382,19 @@
     }
   </script>
 
+  <script>
+	$(function(){
+      $("#formApplicationADD").load("address-form");
+      $("#formApplicationBP").load("basic-profile");
+      $("#formApplicationAPP").load("appointments");
+      $("#formApplicationCAP").load("capitals");
+      $("#formApplicationFIN").load("financials");
+      $("#formApplicationGRA").load("grants");
+      $("#formApplicationHIS").load("history");
+      $("#formApplicationLIC").load("licenses");
+      $("#formApplicationSHA").load("shareholders");
+    });
+  </script>
 </head>
 
 <body class="EDH">
@@ -235,6 +426,25 @@
 										<option value="T18LL0001A">T18LL0001A - Limited Liability Partnership</option>
 										<option value="T18SS0001A">T18SS0001A - Society</option>
 										<option value="T18AF0001A">T18AF0001A - Audit Firm</option>
+										<option value="180000001W">180000001W - Test Firm</option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom:15px">
+							<div class="col-sm-9">
+								<div class="select-wrapper">
+									<i class="fa fa-angle-down"></i>
+									<select id="input_attribute" class="form-control" name="entry" required="">
+										<option value="BP">Basic Profile</option>
+										<option value="ADD">Addresses</option>
+										<option value="APP">Appointments</option>
+										<option value="CAP">Capitals</option>
+										<option value="FIN">Financials</option>
+										<option value="GRA">Grants</option>
+										<option value="HIS">History</option>
+										<option value="LIC">Licenses</option>
+										<option value="SHA">Shareholders</option>
 									</select>
 								</div>
 							</div>
@@ -266,102 +476,15 @@
 	</a>
 
 	<section id="form" class="lone-about-us section-padding">
-		<form id="formApplication" class="toggle_content">
-			<div class="container">
-				<div class="single-heading">
-					<h2>Form</h2>
-					<h4>Application pre-filled with EDH!</h4>
-				</div>
-				<div class="row">
-					<div class="col-md-12 mb-4">
-						<p style="text-align:center;">Confirm your details below and click "Submit Application".</p>
-					</div>
-				</div>
-				<div class="row justify-content-around">
-					<div class="col-md-12 col-lg-5 form-box mb-4">
-						<h3>Corporate Information</h3>
-						<hr>
-						<div class="form-group">
-							<label>UEN</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="uen" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Entity Name</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="entity-name" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Entity Type</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="entity-type" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Entity Status</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="entity-status" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Registered Address</label>
-							<div class="input-group">
-								<textarea cols="50" rows="3" name="enregadd"></textarea>
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Registration Date</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="registration-date" placeholder="" required="">
-							</div>
-						</div>
-						<hr>
-						<div class="form-group">
-							<label>Primary SSIC</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="primary-ssic" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Secondary SSIC</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="secondary-ssic" placeholder="" required="">
-							</div>
-						</div>
-						<hr>
-						<div class="form-group">
-							<label>Appointment 1 - Position</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="position" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Appointment 1 - NRIC/UEN</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="appoint-ic-uen" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Appointment 1 - Full Name</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="appoint-name" placeholder="" required="">
-							</div>
-						</div>
-						<div class="form-group">
-							<label>Appointment 1 - Appointment Date</label>
-							<div class="input-group">
-								<input type="text" class="form-control" name="appoint-date" placeholder="" required="">
-							</div>
-						</div>
-					</div>
-					<div class="col-md-12 text-center">
-						<a href="#" class="btn2">Submit Application</a>
-					</div>
-				</div>
-			</div>
-		</form>
+		<form id="formApplicationBP" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationADD" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationAPP" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationCAP" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationFIN" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationGRA" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationHIS" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationLIC" class="toggle_content" style="display:none"></form>
+		<form id="formApplicationSHA" class="toggle_content" style="display:none"></form>
 	</section>
 
 	<script src="../../vendor/jquery/jquery-3.3.1.min.js"></script>

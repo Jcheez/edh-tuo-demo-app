@@ -44,6 +44,51 @@ router.get('/', function(req, res, next) {
   res.sendFile(path.join(__dirname + '/../views/html/index.html'));
 });
 
+/* Get Basic Profile Form */
+router.get('/basic-profile', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/basic-profile.html'));
+});
+
+/* Get Address Form */
+router.get('/address-form', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/address-form.html'));
+});
+
+/* Get Appointments Form */
+router.get('/appointments', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/appointments.html'));
+});
+
+/* Get Capitals Form */
+router.get('/capitals', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/capitals.html'));
+});
+
+/* Get Revenue Form */
+router.get('/financials', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/financials.html'));
+});
+
+/* Get Grants Form */
+router.get('/grants', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/grants.html'));
+});
+
+/* Get History Form */
+router.get('/history', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/history.html'));
+});
+
+/* Get License Form */
+router.get('/licenses', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/licenses.html'));
+});
+
+/* Get Shareholders Form */
+router.get('/shareholders', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/../views/html/forms/shareholders.html'));
+});
+
 // callback function - directs back to home page
 router.get('/callback', function(req, res, next) {
   res.sendFile(path.join(__dirname + '/../views/html/index.html'));
